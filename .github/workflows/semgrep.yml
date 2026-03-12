@@ -1,0 +1,42 @@
+name: Semgrep Analysis
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  semgrep:
+    runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Semgrep built-in rules
+        run: |
+          semgrep --config=p/csharp \
+                  --sarif \
+                  --output=semgrep-builtin.sarif \
+                  ./src
+
+      - name: Run custom CVE-2020-5811 rule
+        run: |
+          semgrep --config=.github/semgrep/cve-2020-5811-semgrep.yaml \
+                  --sarif \
+                  --output=semgrep-cve.sarif \
+                  ./src
+
+      - name: Upload Semgrep results to GitHub
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: semgrep-cve.sarif
+          category: semgrep
+
+      - name: Save reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: semgrep-reports
+          path: |
+            semgrep-builtin.sarif
+            semgrep-cve.sarif
