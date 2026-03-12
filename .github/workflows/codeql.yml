@@ -32,7 +32,7 @@ jobs:
           dotnet-version: '6.0.x'
 
       - name: Build Umbraco
-        run: dotnet build src/Umbraco.Web/Umbraco.Web.csproj
+        run: dotnet build umbraco.sln
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
