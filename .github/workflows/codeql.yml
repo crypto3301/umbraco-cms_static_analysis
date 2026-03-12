@@ -1,0 +1,48 @@
+name: CodeQL Analysis
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:  
+
+jobs:
+  analyze:
+    name: Analyze C#
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: csharp
+          queries: security-and-quality
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Build Umbraco
+        run: dotnet build src/Umbraco.Web/Umbraco.Web.csproj
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:csharp"
+          output: results/codeql
+          upload: true  
+
+      - name: Run custom CVE-2020-5811 rule
+        uses: github/codeql-action/analyze@v3
+        with:
+          queries: ./.github/codeql/cve-2020-5811-path-traversal.ql
+          output: results/cve-custom
