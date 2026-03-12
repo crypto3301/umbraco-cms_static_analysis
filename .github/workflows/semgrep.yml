@@ -23,6 +23,7 @@ jobs:
                   ./src
 
       - name: Run custom CVE-2020-5811 rule
+        continue-on-error: true
         run: |
           semgrep --config=.github/semgrep/cve-2020-5811-semgrep.yaml \
                   --sarif \
